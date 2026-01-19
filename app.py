@@ -8,46 +8,34 @@ from io.export_excel import export_excels
 st.set_page_config(page_title="Fleet Excel Manager", layout="centered")
 
 st.title("Fleet Excel Manager")
+st.write("Last opp Excel-fil. Filer blir generert for nedlasting.")
 
 uploaded_file = st.file_uploader(
-    "Last opp Excel-fil",
+    "Velg Excel-fil",
     type=["xlsx"]
 )
 
-if uploaded_file is not None:
+if uploaded_file:
     init_db()
     session = SessionLocal()
-
-    temp_dir = Path("tmp")
-    temp_dir.mkdir(exist_ok=True)
-    temp_file = temp_dir / uploaded_file.name
-
-    with open(temp_file, "wb") as f:
-        f.write(uploaded_file.getbuffer())
 
     with st.spinner("Behandler fil..."):
         import_excel(
             session=session,
-            excel_path=str(temp_file),
-            source="full",
+            excel_path=uploaded_file,
+            source="upload",
         )
 
-        export_excels(session=session)
+        exported_files = export_excels(session)
 
     st.success("Ferdig! Last ned filer:")
 
-    for filename in [
-        "bilpleiehallen.xlsx",
-        "Full_oversikt.xlsx",
-        "Admin.xlsx",
-    ]:
-        if Path(filename).exists():
-            with open(filename, "rb") as f:
-                st.download_button(
-                    label=f"Last ned {filename}",
-                    data=f.read(),
-                    file_name=filename,
-                )
-
+    for filename, buffer in exported_files.items():
+        st.download_button(
+            label=f"Last ned {filename}",
+            data=buffer,
+            file_name=filename,
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
 else:
     st.info("Last opp ei Excel-fil for å starte.")
