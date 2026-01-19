@@ -1,0 +1,38 @@
+# ======================================================
+# Input mapping configuration
+#
+# This file defines how incoming Excel columns
+# are mapped into the internal Vehicle model.
+#
+# Changing this file does NOT require code changes.
+# ======================================================
+
+input:
+  # Name of the sheet to read (optional)
+  sheet_name: null
+
+  # Column used as primary external identifier
+  # (reservation number if present)
+  primary_key: reservation_number
+
+columns:
+  # Example structure (to be filled later):
+  #
+  # "Excel Column Name":
+  #   field: internal_field_name
+  #   transform: optional
+  #   split: optional
+  #
+  # DO NOT fill this yet.
+  {}
+
+transforms:
+  # Available transformations:
+  # - strip
+  # - uppercase
+  # - lowercase
+  # - boolean_yes_no
+  # - date
+  #
+  # Custom transforms can be added later
+  {}
