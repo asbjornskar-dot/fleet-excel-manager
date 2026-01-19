@@ -1,0 +1,50 @@
+# ======================================================
+# Export configuration
+# Defines how internal data is written to Excel files
+# ======================================================
+
+exports:
+
+  delivery_list:
+    filename: Leveringsliste.xlsx
+    columns:
+      - model
+      - delivery_date
+      - delivery_time
+      - preparation_color_code
+      - comment_1
+
+  full_overview:
+    filename: Full_oversikt.xlsx
+    columns:
+      - reservation_number
+      - customer_name
+      - model
+      - color
+      - vin
+      - eta
+      - delivery_date
+      - delivery_time
+      - winter_tires
+      - preparation_color_code
+      - comment_1
+      - comment_2
+      - comment_3
+
+  admin:
+    filename: Admin.xlsx
+    columns:
+      - system_id
+      - reservation_number
+      - customer_name
+      - model
+      - color
+      - vin
+      - eta
+      - delivery_date
+      - delivery_time
+      - winter_tires
+      - preparation_color_code
+      - comment_1
+      - comment_2
+      - comment_3
