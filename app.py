@@ -1,26 +1,23 @@
 import streamlit as st
-import pandas as pd
 from pathlib import Path
 
-# Placeholder imports – these will be wired properly next
-# The goal of this step is to verify end-to-end flow
-from core.model import Vehicle
-from core.sync import sync_vehicle
+from db.database import SessionLocal, init_db
+from io.import_excel import import_excel
+from io.export_excel import export_excels
 
 st.set_page_config(page_title="Fleet Excel Manager", layout="centered")
 
 st.title("Fleet Excel Manager")
-st.write("Last opp Excel-fil for behandling og eksport.")
 
 uploaded_file = st.file_uploader(
-    "Velg Excel-fil",
+    "Last opp Excel-fil",
     type=["xlsx"]
 )
 
 if uploaded_file is not None:
-    st.success("Fil lastet opp")
+    init_db()
+    session = SessionLocal()
 
-    # Save uploaded file temporarily
     temp_dir = Path("tmp")
     temp_dir.mkdir(exist_ok=True)
     temp_file = temp_dir / uploaded_file.name
@@ -28,37 +25,29 @@ if uploaded_file is not None:
     with open(temp_file, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    st.write("Behandler fil...")
+    with st.spinner("Behandler fil..."):
+        import_excel(
+            session=session,
+            excel_path=str(temp_file),
+            source="full",
+        )
 
-    # NOTE:
-    # Full processing pipeline (DB + mapping + export)
-    # will be connected in the next step.
-    # For now, this verifies Streamlit + file handling.
+        export_excels(session=session)
 
-    st.success("Fil mottatt og klar for prosessering.")
+    st.success("Ferdig! Last ned filer:")
 
-    st.write("Eksportfiler vil bli tilgjengelige her.")
-
-    st.download_button(
-        label="Last ned bilpleiehallen.xlsx",
-        data=b"",
-        file_name="bilpleiehallen.xlsx",
-        disabled=True
-    )
-
-    st.download_button(
-        label="Last ned Full_oversikt.xlsx",
-        data=b"",
-        file_name="Full_oversikt.xlsx",
-        disabled=True
-    )
-
-    st.download_button(
-        label="Last ned Admin.xlsx",
-        data=b"",
-        file_name="Admin.xlsx",
-        disabled=True
-    )
+    for filename in [
+        "bilpleiehallen.xlsx",
+        "Full_oversikt.xlsx",
+        "Admin.xlsx",
+    ]:
+        if Path(filename).exists():
+            with open(filename, "rb") as f:
+                st.download_button(
+                    label=f"Last ned {filename}",
+                    data=f.read(),
+                    file_name=filename,
+                )
 
 else:
-    st.info("Ingen fil lastet opp enno.")
+    st.info("Last opp ei Excel-fil for å starte.")
