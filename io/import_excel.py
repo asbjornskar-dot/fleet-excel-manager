@@ -1,40 +1,12 @@
-import pandas as pd
-import yaml
-from sqlalchemy.orm import Session
-
-from core.model import Vehicle
-from core.matcher import match_vehicle
-from core.sync import sync_vehicle
-
-
-def load_mapping(path="config/input_mapping.yaml"):
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
-
-
-def transform_value(value, transforms):
-    for t in transforms or []:
-        if value is None:
-            return None
-
-        if t == "strip":
-            value = str(value).strip()
-        elif t == "uppercase":
-            value = str(value).upper()
-        elif t == "lowercase":
-            value = str(value).lower()
-        elif t == "date":
-            value = pd.to_datetime(value, dayfirst=True).date()
-    return value
-
-
 def import_excel(
     session: Session,
-    excel_path: str,
+    excel_path,
     source: str,
 ):
     mapping = load_mapping()
     df = pd.read_excel(excel_path)
+
+    preview_rows = []
 
     for _, row in df.iterrows():
         incoming_data = {}
@@ -43,6 +15,9 @@ def import_excel(
             raw_value = row.get(col)
             value = transform_value(raw_value, cfg.get("transform"))
             incoming_data[cfg["field"]] = value
+
+        # For UI preview
+        preview_rows.append(incoming_data.copy())
 
         vehicles = session.query(Vehicle).all()
         matched_vehicle = None
@@ -68,3 +43,4 @@ def import_excel(
             session.add(new_vehicle)
 
     session.commit()
+    return preview_rows
